@@ -73,10 +73,14 @@ function generateGrid() {
 					cell.className = 'cell';
 					cell.min = 1;
 					cell.max = 9;
+					cell.maxLength = 1;
 					cell.setAttribute('band', i);
 					cell.setAttribute('stack', j);
 					cell.setAttribute('row', 3*i+k);
 					cell.setAttribute('col', 3*j+l);
+					cell.setAttribute('onkeypress', 'preventNonNumericalInput(event)');
+					cell.setAttribute('onkeyup', 'limitInputLength(event, this)');
+					cell.setAttribute('onkeydown', 'limitInputLength(event, this)');
 					
 					if (gridObject[3*i+k][3*j+l].defaultShown) {
 						cell.value = gridObject[3*i+k][3*j+l].value;
@@ -159,5 +163,21 @@ function transpose() {
 		}
 		grid.push(row);
 	}
+}
+
+function preventNonNumericalInput(e) {
+	e = e || window.event;
+	var charCode = (typeof e.which == "undefined") ? e.keyCode : e.which;
+	var charStr = String.fromCharCode(charCode);
+  
+	if (!charStr.match(/^[0-9]$/)) {
+		e.preventDefault();
+	}
+}
+function limitInputLength(e, t) {
+	let lengthLimit = 1;
+	if (t.value.length > lengthLimit) {
+		t.value = t.value.substring(0, lengthLimit);
+ 	}
 }
 
