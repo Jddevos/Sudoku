@@ -9,20 +9,21 @@ function start() {
 function generateData() {
 	// https://gamedev.stackexchange.com/questions/56149/how-can-i-generate-sudoku-puzzles
 	grid = [
-		[1,2,3,4,5,6,7,8,9],
-		[7,8,9,1,2,3,4,5,6],
-		[4,5,6,7,8,9,1,2,3],
-		[3,4,5,6,7,8,9,1,2],
-		[9,1,2,3,4,5,6,7,8],
-		[6,7,8,9,1,2,3,4,5],
-		[2,3,4,5,6,7,8,9,1],
-		[8,9,1,2,3,4,5,6,7],
-		[5,6,7,8,9,1,2,3,4]		
+		['a','b','c','d','e','f','g','h','i'],
+		['d','e','f','g','h','i','a','b','c'],
+		['g','h','i','a','b','c','d','e','f'],
+		['c','d','e','f','g','h','i','a','b'],
+		['f','g','h','i','a','b','c','d','e'],
+		['i','a','b','c','d','e','f','g','h'],
+		['b','c','d','e','f','g','h','i','a'],
+		['e','f','g','h','i','a','b','c','d'],
+		['h','i','a','b','c','d','e','f','g']	
 	];	// Prepopulate the grid
 
 	// Shuffle the grid
 	for (let i=0; i<10000; i++) {
-		switch (getRandomIntInclusive(1,2)) {
+		let permutation = getRandomIntInclusive(1,2);
+		switch (permutation) {
 			case 1:	// Swap
 				swapHandler();
 				break;
@@ -36,6 +37,18 @@ function generateData() {
 			default:
 				console.log('Error in shuffling, default case reached.');
 				break;
+		}
+	}
+
+	let swapElements = shuffleArray(['a','b','c','d','e','f','g','h','i']);
+	console.log(swapElements);
+	for (let i=0; i<grid.length; i++) {
+		for (let j=0; j<grid[i].length; j++) {
+			for (let k=0; k<swapElements.length; k++) {
+				if (grid[i][j] == swapElements[k]) {
+					grid[i][j] = k+1;
+				}
+			}
 		}
 	}
 
@@ -69,7 +82,7 @@ function generateGrid() {
 					let cell = document.createElement('input');
 					// ijkl makes a unique base3 code for each cell
 					cell.id = 'cell_'+i+j+k+l;
-					cell.type = 'number';
+					cell.type = 'text';
 					cell.className = 'cell';
 					cell.min = 1;
 					cell.max = 9;
@@ -79,8 +92,6 @@ function generateGrid() {
 					cell.setAttribute('row', 3*i+k);
 					cell.setAttribute('col', 3*j+l);
 					cell.setAttribute('onkeypress', 'preventNonNumericalInput(event)');
-					cell.setAttribute('onkeyup', 'limitInputLength(event, this)');
-					cell.setAttribute('onkeydown', 'limitInputLength(event, this)');
 					
 					if (gridObject[3*i+k][3*j+l].defaultShown) {
 						cell.value = gridObject[3*i+k][3*j+l].value;
@@ -165,6 +176,24 @@ function transpose() {
 	}
 }
 
+function shuffleArray(array) {
+	let currentIndex = array.length;
+	let temporaryValue, randomIndex;
+
+	// While there remain elements to shuffle...
+	while (0 !== currentIndex) {
+		// Pick a remaining element...
+		randomIndex = Math.floor(Math.random() * currentIndex);
+		currentIndex -= 1;
+		// And swap it with the current element.
+		temporaryValue = array[currentIndex];
+		array[currentIndex] = array[randomIndex];
+		array[randomIndex] = temporaryValue;
+	}
+
+	return array;
+}
+
 function preventNonNumericalInput(e) {
 	e = e || window.event;
 	var charCode = (typeof e.which == "undefined") ? e.keyCode : e.which;
@@ -174,10 +203,3 @@ function preventNonNumericalInput(e) {
 		e.preventDefault();
 	}
 }
-function limitInputLength(e, t) {
-	let lengthLimit = 1;
-	if (t.value.length > lengthLimit) {
-		t.value = t.value.substring(0, lengthLimit);
- 	}
-}
-
