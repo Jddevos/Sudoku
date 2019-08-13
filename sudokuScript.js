@@ -1,5 +1,6 @@
 var grid = [];
 var gridObject = [];
+var displayPercentage = 0.35;
 
 function start() {
 	generateData();
@@ -12,17 +13,18 @@ function generateData() {
 		['a','b','c','d','e','f','g','h','i'],
 		['d','e','f','g','h','i','a','b','c'],
 		['g','h','i','a','b','c','d','e','f'],
+		['i','a','b','c','d','e','f','g','h'],
 		['c','d','e','f','g','h','i','a','b'],
 		['f','g','h','i','a','b','c','d','e'],
-		['i','a','b','c','d','e','f','g','h'],
+		['h','i','a','b','c','d','e','f','g'],
 		['b','c','d','e','f','g','h','i','a'],
-		['e','f','g','h','i','a','b','c','d'],
-		['h','i','a','b','c','d','e','f','g']	
+		['e','f','g','h','i','a','b','c','d']
+			
 	];	// Prepopulate the grid
 
 	// Shuffle the grid
 	for (let i=0; i<10000; i++) {
-		let permutation = getRandomIntInclusive(1,2);
+		let permutation = getRandomIntInclusive(1,4);
 		switch (permutation) {
 			case 1:	// Swap
 				swapHandler();
@@ -31,8 +33,10 @@ function generateData() {
 				transpose();
 				break;
 			case 3:	// Rotate
+				rotate();
 				break;
 			case 4: // Mirror
+				mirror();
 				break;
 			default:
 				console.log('Error in shuffling, default case reached.');
@@ -40,8 +44,9 @@ function generateData() {
 		}
 	}
 
+	// Replace letters with random numbers
 	let swapElements = shuffleArray(['a','b','c','d','e','f','g','h','i']);
-	console.log(swapElements);
+	// console.log(swapElements);
 	for (let i=0; i<grid.length; i++) {
 		for (let j=0; j<grid[i].length; j++) {
 			for (let k=0; k<swapElements.length; k++) {
@@ -56,7 +61,7 @@ function generateData() {
 	for (let i=0; i<grid.length; i++) {
 		let row = [];
 		for (let j=0; j<grid[i].length; j++) {
-			row.push({value: grid[i][j], defaultShown: getRandomIntInclusive(0,1)});
+			row.push({value: grid[i][j], defaultShown: isVisible(displayPercentage)});
 		}
 		gridObject.push(row);
 	}
@@ -174,6 +179,40 @@ function transpose() {
 		}
 		grid.push(row);
 	}
+}
+function rotate() {
+	const n = grid.length;
+	const x = Math.floor(n/ 2);
+	const y = n - 1;
+	const rotations = getRandomIntInclusive(1,3);
+	for (let r=0; r<rotations; r++) {
+		for (let i=0; i<x; i++) {
+			for (let j=i; j<y-i; j++) {
+				k = grid[i][j];
+				grid[i][j] = grid[y-j][i];
+				grid[y-j][i] = grid[y-i][y-j];
+				grid[y-i][y-j] = grid[j][y-i];
+				grid[j][y-i] = k;
+			}
+		}
+	}
+}
+function mirror() {
+	let direction = getRandomIntInclusive(0,1);
+	switch (direction) {
+		case 0:	// Vertical
+			grid.reverse();
+			break
+		case 1:	// Horizontal
+			for (let i=0; i<grid.length; i++) {
+				grid[i].reverse();
+			}
+			break;
+	}
+}
+function isVisible(rate) {
+	// Return true at the passed rate
+	return Math.random() < rate;
 }
 
 function shuffleArray(array) {

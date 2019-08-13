@@ -41,16 +41,16 @@ input[type=number]::-webkit-outer-spin-button {
 	font-family: Arial, Helvetica, sans-serif;
 }
 
-#block_00 input[type="number"],
-#block_02 input[type="number"],
-#block_11 input[type="number"],
-#block_20 input[type="number"],
-#block_22 input[type="number"] {
+#block_00 input[type="text"],
+#block_02 input[type="text"],
+#block_11 input[type="text"],
+#block_20 input[type="text"],
+#block_22 input[type="text"] {
 	background-color: lightgray;
 }
-#block_01 input[type="number"],
-#block_10 input[type="number"],
-#block_12 input[type="number"],
-#block_21 input[type="number"] {
+#block_01 input[type="text"],
+#block_10 input[type="text"],
+#block_12 input[type="text"],
+#block_21 input[type="text"] {
 	background-color: white;
 }
