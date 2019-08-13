@@ -24,6 +24,7 @@ body {
 	text-align: center;
 	vertical-align: middle;
 	border: 1px solid black;
+	color: black;
 }
 input[type=number] {
 	-moz-appearance: textfield;	/* Hide input spinners in Firefox */
@@ -39,6 +40,10 @@ input[type=number]::-webkit-outer-spin-button {
 	pointer-events: none;
 	font-weight: bold;
 	font-family: Arial, Helvetica, sans-serif;
+}
+.incorrect {
+	color: darkred;
+	font-weight: bold;
 }
 
 #block_00 input[type="text"],

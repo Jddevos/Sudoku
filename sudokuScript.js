@@ -1,42 +1,39 @@
-var grid = [];
+var debug = false;
+var showWrong = true;
 var gridObject = [];
-var displayPercentage = 0.35;
+var displayPercentage = 0.5;
+const boards = [
+	'abcdefghidefghiabcghiabcdefcdefghiabfghiabcdeiabcdefghbcdefghiaefghiabcdhiabcdefg',
+	'abcfdhiegdefcigahbghiebacdfefdghcbaibiadefhgchcgiabdfecghbfdeiafaehcigbdidbagefch'
+];
+
 
 function start() {
+	displayPercentage = debug ? 1 : displayPercentage;
 	generateData();
 	generateGrid();
 }
 
 function generateData() {
-	// https://gamedev.stackexchange.com/questions/56149/how-can-i-generate-sudoku-puzzles
-	grid = [
-		['a','b','c','d','e','f','g','h','i'],
-		['d','e','f','g','h','i','a','b','c'],
-		['g','h','i','a','b','c','d','e','f'],
-		['i','a','b','c','d','e','f','g','h'],
-		['c','d','e','f','g','h','i','a','b'],
-		['f','g','h','i','a','b','c','d','e'],
-		['h','i','a','b','c','d','e','f','g'],
-		['b','c','d','e','f','g','h','i','a'],
-		['e','f','g','h','i','a','b','c','d']
-			
-	];	// Prepopulate the grid
+	// Grab a board from the list of boards
+	let grid = parseBoardString(boards[getRandomIntInclusive(0,boards.length-1)]);
 
 	// Shuffle the grid
-	for (let i=0; i<10000; i++) {
+	let shuffleNumber = debug ? 0 : 10000;
+	for (let i=0; i<shuffleNumber; i++) {
 		let permutation = getRandomIntInclusive(1,4);
 		switch (permutation) {
 			case 1:	// Swap
-				swapHandler();
+				grid = swapHandler(grid);
 				break;
 			case 2:	// Transpose
-				transpose();
+				grid = transpose(grid);
 				break;
 			case 3:	// Rotate
-				rotate();
+				grid = rotate(grid);
 				break;
 			case 4: // Mirror
-				mirror();
+				grid = mirror(grid);
 				break;
 			default:
 				console.log('Error in shuffling, default case reached.');
@@ -45,8 +42,9 @@ function generateData() {
 	}
 
 	// Replace letters with random numbers
-	let swapElements = shuffleArray(['a','b','c','d','e','f','g','h','i']);
-	// console.log(swapElements);
+	let swapElements = ['a','b','c','d','e','f','g','h','i'];
+	if (!debug) swapElements = shuffleArray(swapElements);
+	if (debug) console.log('Elements: '+swapElements);
 	for (let i=0; i<grid.length; i++) {
 		for (let j=0; j<grid[i].length; j++) {
 			for (let k=0; k<swapElements.length; k++) {
@@ -66,7 +64,6 @@ function generateData() {
 		gridObject.push(row);
 	}
 }
-
 function generateGrid() {
 	let gridDiv = document.getElementById('grid');
 	gridDiv.innerHTML = '';
@@ -97,6 +94,7 @@ function generateGrid() {
 					cell.setAttribute('row', 3*i+k);
 					cell.setAttribute('col', 3*j+l);
 					cell.setAttribute('onkeypress', 'preventNonNumericalInput(event)');
+					cell.setAttribute('onkeyup', 'checkCorrect(this)');
 					
 					if (gridObject[3*i+k][3*j+l].defaultShown) {
 						cell.value = gridObject[3*i+k][3*j+l].value;
@@ -117,98 +115,131 @@ function getRandomIntInclusive(min, max) {
 	max = Math.floor(max);
 	return Math.floor(Math.random() * (max - min + 1)) + min; //The maximum is inclusive and the minimum is inclusive 
 }
-function swapHandler() {
+function parseBoardString(text) {
+	let matrix = [];
+	let size = Math.sqrt(text.length);
+	if (debug) console.log(text);
+
+	if (size%1 != 0) {
+		console.log('Improper board detected: '+text);
+		return;
+	}
+
+	for (let i=0; i<size; i++) {
+		matrix.push([...text.slice(size*i,size*i+size)]);
+	}
+
+	return matrix;
+}
+function swapHandler(matrix) {
 	switch (getRandomIntInclusive(1,4)) {	// Choose what we are swapping
 		case 1:	// Swap bands
-			swapBands();
+			matrix = swapBands(matrix);
 			break;
 		case 2:	// Swap stacks
-			swapStacks();
+			matrix = swapStacks(matrix);
 			break;
 		case 3:	// Swap rows
-			swapRows();
+			matrix = swapRows(matrix);
 			break;
 		case 4:	// Swap columns
-			swapCols();
+			matrix = swapCols(matrix);
 			break;
 		default:
 			break;
 	}
+	return matrix;
 }
-function swapBands() {
+function swapBands(matrix) {
 	let band1 = getRandomIntInclusive(0,2);
 	let band2 = band1%3==2 ? band1-2 : band1+1;
-	// console.log(band1+' '+band2);
-	let temp1 = grid[band1*3+0];
-	let temp2 = grid[band1*3+1];
-	let temp3 = grid[band1*3+2];
-	grid[band1*3+0] = grid[band2*3+0];
-	grid[band1*3+1] = grid[band2*3+1];
-	grid[band1*3+2] = grid[band2*3+2];
-	grid[band2*3+0] = temp1;
-	grid[band2*3+1] = temp2;
-	grid[band2*3+2] = temp3;
+	if (debug) console.log('Swapping bands '+band1+' & '+band2);
+	let temp1 = matrix[band1*3+0];
+	let temp2 = matrix[band1*3+1];
+	let temp3 = matrix[band1*3+2];
+	matrix[band1*3+0] = matrix[band2*3+0];
+	matrix[band1*3+1] = matrix[band2*3+1];
+	matrix[band1*3+2] = matrix[band2*3+2];
+	matrix[band2*3+0] = temp1;
+	matrix[band2*3+1] = temp2;
+	matrix[band2*3+2] = temp3;
+
+	return matrix;
 }
-function swapStacks() {
-	transpose();
-	swapBands();
-	transpose();
+function swapStacks(matrix) {
+	matrix = transpose(matrix);
+	matrix = swapBands(matrix);
+	matrix = transpose(matrix);
+
+	return matrix;
 }
-function swapRows() {
+function swapRows(matrix) {
 	let row1 = getRandomIntInclusive(0,8);
 	let row2 = row1%3==2 ? row1-2 : row1+1;
-	// console.log(row1+' '+row2);
-	let temp = grid[row1];
-	grid[row1] = grid[row2];
-	grid[row2] = temp;
+	if (debug) console.log('Swapping rows '+row1+' & '+row2);
+	let temp = matrix[row1];
+	matrix[row1] = matrix[row2];
+	matrix[row2] = temp;
+
+	return matrix;
 }
-function swapCols() {
-	transpose();
-	swapRows();
-	transpose();
+function swapCols(matrix) {
+	matrix = transpose(matrix);
+	matrix = swapRows(matrix);
+	matrix = transpose(matrix);
+
+	return matrix;
 }
-function transpose() {
-	const tempGrid = grid;
-	grid = [];
+function transpose(matrix) {
+	if (debug) console.log('Transposing');
+	const tempGrid = matrix;
+	matrix = [];
 	
 	for (let i=0; i<tempGrid.length; i++) {
 		let row = [];
 		for (let j=0; j<tempGrid[i].length; j++) {
 			row.push(tempGrid[j][i]);
-			// console.log('Setting grid['+i+']['+j+'] to '+tempGrid[j][i]);
 		}
-		grid.push(row);
+		matrix.push(row);
 	}
+	return matrix;
 }
-function rotate() {
-	const n = grid.length;
+function rotate(matrix) {
+	const n = matrix.length;
 	const x = Math.floor(n/ 2);
 	const y = n - 1;
 	const rotations = getRandomIntInclusive(1,3);
+	if (debug) console.log('Rotating '+rotations+' times');
 	for (let r=0; r<rotations; r++) {
 		for (let i=0; i<x; i++) {
 			for (let j=i; j<y-i; j++) {
-				k = grid[i][j];
-				grid[i][j] = grid[y-j][i];
-				grid[y-j][i] = grid[y-i][y-j];
-				grid[y-i][y-j] = grid[j][y-i];
-				grid[j][y-i] = k;
+				k = matrix[i][j];
+				matrix[i][j] = matrix[y-j][i];
+				matrix[y-j][i] = matrix[y-i][y-j];
+				matrix[y-i][y-j] = matrix[j][y-i];
+				matrix[j][y-i] = k;
 			}
 		}
 	}
+
+	return matrix;
 }
-function mirror() {
+function mirror(matrix) {
 	let direction = getRandomIntInclusive(0,1);
 	switch (direction) {
 		case 0:	// Vertical
-			grid.reverse();
+			if (debug) console.log('Mirroring vertically');
+			matrix.reverse();
 			break
 		case 1:	// Horizontal
-			for (let i=0; i<grid.length; i++) {
-				grid[i].reverse();
+			if (debug) console.log('Mirroring horizontally');
+			for (let i=0; i<matrix.length; i++) {
+				matrix[i].reverse();
 			}
 			break;
 	}
+
+	return matrix;
 }
 function isVisible(rate) {
 	// Return true at the passed rate
@@ -231,6 +262,21 @@ function shuffleArray(array) {
 	}
 
 	return array;
+}
+
+function checkCorrect(t) {
+	if (showWrong) {
+		let v = parseInt(t.value);
+		let r = parseInt(t.getAttribute('row'));
+		let c = parseInt(t.getAttribute('col'));
+
+		if (v == gridObject[r][c].value) {
+			t.classList.remove('incorrect');
+		}
+		else {
+			t.classList.add('incorrect');
+		}
+	}
 }
 
 function preventNonNumericalInput(e) {
