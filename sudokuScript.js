@@ -4,7 +4,11 @@ var gridObject = [];
 var displayPercentage = 0.5;
 const boards = [
 	'abcdefghidefghiabcghiabcdefcdefghiabfghiabcdeiabcdefghbcdefghiaefghiabcdhiabcdefg',
-	'abcfdhiegdefcigahbghiebacdfefdghcbaibiadefhgchcgiabdfecghbfdeiafaehcigbdidbagefch'
+	'abcdefghiehdcgiafbifghbacedhdeifcbagbgaehdficfcigabedhcifbdehgadahfcgibegebaihdcf',
+	'abcdefghiefihgadbcghdbiceafcigfdhaebbeaicghfdfdheabicghgecfibdadafgbdcihicbahdfge',
+	'abcdefghifghiacdbeedigbhfcaicafdehgbdfehgbiacghbciaefdcidbhgaefhefacibdgbagefdcih',
+	'abcdefghihgeciadfbdifhbgeaceahifcbgdcfbgdhieagdieabhcficgfhdabefeabgicdhbhdacefig',
+	'abcdefghihiegbcdfagfdiahcebehgfiabcdfcbedgiahidahcbfgecaibgehdfdefchiabgbghafdeic'
 ];
 
 
@@ -287,4 +291,19 @@ function preventNonNumericalInput(e) {
 	if (!charStr.match(/^[0-9]$/)) {
 		e.preventDefault();
 	}
+}
+function puzzleConversion (sourceString) {
+    if (sourceString.length != 81) {
+        console.log('Incorrect puzzle length.');
+        return;
+    }
+    
+    let fixedString = sourceString;
+    
+    for (let i=0; i<9; i++) {
+		let regex = new RegExp(sourceString[i], 'g');
+        fixedString = fixedString.replace(regex, String.fromCharCode(i+97));
+    }
+
+    console.log(fixedString);
 }
